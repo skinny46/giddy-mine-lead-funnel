@@ -25,7 +25,7 @@ interface LandingViewProps {
 }
 
 const GOOGLE_FORM_ACTION_URL =
-  'https://docs.google.com/forms/d/e/YOUR_PUBLIC_FORM_ID/formResponse';
+  'https://docs.google.com/forms/d/e/1FAIpQLSfOoc5eckdCZRegf-IMnC4WznmwniZUBwInv1f_ebnfKzHskQ/formResponse';
 
 const BENEFITS = [
   {
