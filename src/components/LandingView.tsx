@@ -24,6 +24,9 @@ interface LandingViewProps {
   nameInputRef: RefObject<HTMLInputElement | null>;
 }
 
+const GOOGLE_FORM_ACTION_URL =
+  'https://docs.google.com/forms/d/e/YOUR_PUBLIC_FORM_ID/formResponse';
+
 const BENEFITS = [
   {
     number: '01',
@@ -102,9 +105,10 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
     };
   }, []);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     if (isSubmittingRef.current) {
-      e.preventDefault();
       return;
     }
 
@@ -113,7 +117,6 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
     const trimmedPhone = phone.trim();
 
     if (trimmedName.length < 2) {
-      e.preventDefault();
       setErrorMessage('Please enter your full name so we can personalize your guide.');
       nameInputRef.current?.focus();
       return;
@@ -121,14 +124,12 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmedEmail)) {
-      e.preventDefault();
       setErrorMessage('Please enter a valid email address.');
       return;
     }
 
     const phoneDigits = trimmedPhone.replace(/\D/g, '');
     if (phoneDigits.length < 7) {
-      e.preventDefault();
       setErrorMessage('Please enter a valid WhatsApp or phone number.');
       return;
     }
@@ -139,22 +140,32 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
 
     const extractedFirstName = trimmedName.split(/\s+/)[0] || 'Friend';
 
-    // Allow the native HTML form POST into hidden_gform_iframe to proceed,
-    // then transition smoothly to the Thank-You Page view after 600ms.
+    const payload = new URLSearchParams({
+      'entry.1247310815': trimmedName,
+      'entry.395392008': trimmedEmail,
+      'entry.1087792134': trimmedPhone,
+    });
+
+    try {
+      await fetch(GOOGLE_FORM_ACTION_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+        },
+        body: payload.toString(),
+      });
+    } catch {
+      // Ignore opaque/network errors in no-cors mode so user still gets the guide
+    }
+
     timerRef.current = window.setTimeout(() => {
       onSuccess(extractedFirstName);
-    }, 600);
+    }, 500);
   };
 
   return (
     <main id="top" className="pb-20">
-      {/* Hidden iframe for zero-CORS Google Form submission */}
-      <iframe
-        name="hidden_gform_iframe"
-        title="Hidden Google Form Submission Target"
-        style={{ display: 'none' }}
-      />
-
       {/* Hero + Lead Capture Split */}
       <section className="mx-auto max-w-[1200px] px-4 pt-8 pb-16 sm:px-6 sm:pt-12 lg:px-8 lg:pt-14 lg:pb-20">
         <div className="grid grid-cols-1 items-stretch gap-10 lg:grid-cols-12 lg:gap-12">
@@ -254,9 +265,6 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
                 </div>
 
                 <form
-                  method="POST"
-                  target="hidden_gform_iframe"
-                  action="https://docs.google.com/forms/d/1NoADNdYhRaRIfqP4TU6fx6legJ34lv7oXkGvYyANy7M/formResponse"
                   onSubmit={handleSubmit}
                   className="mt-6 space-y-5"
                   noValidate
@@ -557,21 +565,21 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
             <div className="relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-[#141414] lg:col-span-3 lg:aspect-[5/4]">
               <ResilientImage
                 src={shoeHi}
-                alt="Glossy white patent pointed-toe kitten heels"
+                alt="Black sculptural block-heel mules with silver metallic ring accent"
                 width={640}
                 height={640}
                 loading="lazy"
                 className="h-full w-full object-cover object-center"
                 aspectClassName="aspect-square lg:aspect-[5/4]"
-                fallbackLabel="White Patent Heels"
+                fallbackLabel="Sculptural Block Mules"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/85 via-transparent to-transparent" />
               <div className="absolute right-3 bottom-3 left-3 sm:right-4 sm:bottom-4 sm:left-4">
                 <p className="text-xs font-semibold text-[#FAFAFA] sm:text-sm">
-                  Dress Pumps &amp; Patent Finishes
+                  Sculptural Block Mules
                 </p>
                 <p className="mt-0.5 text-[11px] text-[#D4AF37] sm:text-xs">
-                  Verify glossy surface &amp; lining comfort
+                  Verify heel stability &amp; hardware finish
                 </p>
               </div>
             </div>
@@ -579,21 +587,18 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
             <div className="relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-[#141414] lg:col-span-2">
               <ResilientImage
                 src={shoeAd}
-                alt="Suede three-stripe slip-on mules in black, tan, brown, olive, and grey"
-                width={480}
-                height={640}
+                alt="Cream and black retro three-stripe leather sneakers"
+                width={640}
+                height={574}
                 loading="lazy"
                 className="h-full w-full object-cover object-center"
                 aspectClassName="aspect-square"
-                fallbackLabel="Suede Slip-On Mules"
+                fallbackLabel="Classic Court Sneakers"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/85 via-transparent to-transparent" />
-              <div className="absolute right-3 bottom-3 left-3 sm:right-4 sm:bottom-4 sm:left-4">
-                <p className="text-xs font-semibold text-[#FAFAFA] sm:text-sm">
-                  Suede Slip-On Mules
-                </p>
-                <p className="mt-0.5 text-[11px] text-[#D4AF37] sm:text-xs">
-                  Inspect nap density &amp; footbed depth
+              <div className="absolute right-3 bottom-3 left-3">
+                <p className="text-xs font-semibold text-[#FAFAFA]">
+                  Classic Court Sneakers
                 </p>
               </div>
             </div>
@@ -601,46 +606,71 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
             <div className="relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-[#141414] lg:col-span-2">
               <ResilientImage
                 src={shoeCrocs}
-                alt="Textured pony-hair embellished slip-on clogs in assorted colors"
-                width={639}
-                height={479}
-                loading="lazy"
-                className="h-full w-full object-cover object-center"
-                aspectClassName="aspect-square"
-                fallbackLabel="Textured Embellished Clogs"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/85 via-transparent to-transparent" />
-              <div className="absolute right-3 bottom-3 left-3 sm:right-4 sm:bottom-4 sm:left-4">
-                <p className="text-xs font-semibold text-[#FAFAFA] sm:text-sm">
-                  Textured Statement Clogs
-                </p>
-                <p className="mt-0.5 text-[11px] text-[#D4AF37] sm:text-xs">
-                  Check hardware trim &amp; sole traction
-                </p>
-              </div>
-            </div>
-
-            <div className="relative col-span-2 aspect-[16/10] overflow-hidden rounded-xl border border-white/10 bg-[#141414] lg:col-span-2 lg:aspect-square">
-              <ResilientImage
-                src={shoePpink}
-                alt="Pastel pink suede low-profile lifestyle sneakers"
+                alt="Matte black sculpted foam clogs with ventilated upper and heel strap"
                 width={640}
                 height={640}
                 loading="lazy"
                 className="h-full w-full object-cover object-center"
-                aspectClassName="aspect-[16/10] lg:aspect-square"
-                fallbackLabel="Low-Profile Suede Sneakers"
+                aspectClassName="aspect-square"
+                fallbackLabel="Everyday Comfort Clogs"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/85 via-transparent to-transparent" />
-              <div className="absolute right-3 bottom-3 left-3 sm:right-4 sm:bottom-4 sm:left-4">
-                <p className="text-xs font-semibold text-[#FAFAFA] sm:text-sm">
-                  Low-Profile Suede Sneakers
-                </p>
-                <p className="mt-0.5 text-[11px] text-[#D4AF37] sm:text-xs">
-                  Confirm flexible sole &amp; color accuracy
+              <div className="absolute right-3 bottom-3 left-3">
+                <p className="text-xs font-semibold text-[#FAFAFA]">
+                  Everyday Comfort Clogs
                 </p>
               </div>
             </div>
+
+            <div className="col-span-2 relative aspect-[2/1] overflow-hidden rounded-xl border border-white/10 bg-[#141414] lg:col-span-2 lg:aspect-square">
+              <ResilientImage
+                src={shoePpink}
+                alt="Blush pink platform sneakers with gum sole and gold heel detail"
+                width={640}
+                height={640}
+                loading="lazy"
+                className="h-full w-full object-cover object-center"
+                aspectClassName="aspect-[2/1] lg:aspect-square"
+                fallbackLabel="Platform Lifestyle Sneakers"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/85 via-transparent to-transparent" />
+              <div className="absolute right-3 bottom-3 left-3">
+                <p className="text-xs font-semibold text-[#FAFAFA]">
+                  Platform Lifestyle Sneakers
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 5: Final Conversion CTA Banner */}
+      <section className="border-t border-white/10 bg-[#111111] py-16 sm:py-20">
+        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+          <p className="text-xs font-semibold tracking-[0.14em] text-[#D4AF37]">
+            GIDDY MINE COLLECTIONS
+          </p>
+          <h2 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-[#FAFAFA] sm:text-4xl">
+            Ready to Order Your Next Pair With Complete Confidence?
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-[#B8B8B8]">
+            Claim your free copy of <span className="font-medium text-[#FAFAFA]">The Smart Footwear Buyer&apos;s Guide</span> now and keep the 7-point checklist handy before every purchase.
+          </p>
+          <div className="mt-8">
+            <a
+              href="#register-card"
+              onClick={(e) => {
+                e.preventDefault();
+                document
+                  .getElementById('register-card')
+                  ?.scrollIntoView({ behavior: 'smooth' });
+                window.setTimeout(() => nameInputRef.current?.focus(), 350);
+              }}
+              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-lg bg-[#D4AF37] px-8 py-3.5 text-sm font-bold tracking-wide text-[#0A0A0A] transition-colors duration-150 hover:bg-[#E5C453] focus-visible:outline-2 focus-visible:outline-[#D4AF37] focus-visible:outline-offset-2"
+            >
+              <span>Get My Free Buyer&apos;s Guide</span>
+              <ArrowRight className="h-4 w-4" />
+            </a>
           </div>
         </div>
       </section>
