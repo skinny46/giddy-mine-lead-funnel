@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Check, Download, MessageCircle } from 'lucide-react';
 import { ResilientImage } from './ResilientImage';
 import guideMockup from '../assets/images/buyers_guide_mockup_1795378314582.jpg';
@@ -15,39 +14,12 @@ const PDF_FILENAME = 'Smart-Footwear-Buyers-Guide-Giddy-Mine-Collections.pdf';
 
 export function ThankYouView({ firstName }: ThankYouViewProps) {
   const displayName = firstName.trim() || 'Friend';
-  const [isDownloading, setIsDownloading] = useState(false);
-
-  const handleDownloadPdf = async () => {
-    if (isDownloading) return;
-    setIsDownloading(true);
-    try {
-      const response = await fetch(PDF_URL, { cache: 'no-store' });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = PDF_FILENAME;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
-    } catch {
-      window.open(PDF_URL, '_blank', 'noopener,noreferrer');
-    } finally {
-      setIsDownloading(false);
-    }
-  };
 
   return (
     <main className="mx-auto flex min-h-[calc(100vh-145px)] max-w-[1200px] items-center px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
       <div className="mx-auto w-full max-w-3xl rounded-xl border border-[#D4AF37]/35 bg-[#141414] p-7 sm:p-10 lg:p-12">
         <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-12">
-          {/* Left / Main Confirmation Content */}
           <div className="md:col-span-8">
-            {/* Gold Checkmark Badge */}
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#D4AF37]/50 bg-[#D4AF37]/15 text-[#D4AF37]">
               <Check className="h-7 w-7 stroke-[2.5]" />
             </div>
@@ -69,22 +41,17 @@ export function ThankYouView({ firstName }: ThankYouViewProps) {
             </p>
 
             <div className="mt-8 flex flex-col gap-3.5">
-              {/* Primary Gold Download Button */}
-              <button
-                type="button"
-                onClick={handleDownloadPdf}
-                disabled={isDownloading}
-                className="inline-flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-2.5 rounded-lg bg-[#D4AF37] px-6 py-3.5 text-center text-sm font-bold tracking-wide text-[#0A0A0A] transition-colors duration-150 hover:bg-[#E5C453] focus-visible:outline-2 focus-visible:outline-[#D4AF37] focus-visible:outline-offset-2 disabled:cursor-wait disabled:opacity-80"
+              <a
+                href={PDF_URL}
+                download={PDF_FILENAME}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-lg bg-[#D4AF37] px-6 py-3.5 text-center text-sm font-bold tracking-wide text-[#0A0A0A] transition-colors duration-150 hover:bg-[#E5C453] focus-visible:outline-2 focus-visible:outline-[#D4AF37] focus-visible:outline-offset-2"
               >
                 <Download className="h-4 w-4 shrink-0" />
-                <span>
-                  {isDownloading
-                    ? 'Preparing PDF Download...'
-                    : "Download The Smart Footwear Buyer's Guide (PDF)"}
-                </span>
-              </button>
+                <span>Download The Smart Footwear Buyer&apos;s Guide (PDF)</span>
+              </a>
 
-              {/* Secondary WhatsApp Button */}
               <a
                 href={WHATSAPP_URL}
                 target="_blank"
@@ -97,7 +64,6 @@ export function ThankYouView({ firstName }: ThankYouViewProps) {
             </div>
           </div>
 
-          {/* Right Guide Cover Preview */}
           <div className="hidden md:col-span-4 md:block">
             <div className="overflow-hidden rounded-lg border border-[#D4AF37]/30 bg-[#0A0A0A]">
               <ResilientImage
