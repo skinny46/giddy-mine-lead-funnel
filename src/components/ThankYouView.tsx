@@ -19,7 +19,9 @@ export function ThankYouView({ firstName }: ThankYouViewProps) {
     <main className="mx-auto flex min-h-[calc(100vh-145px)] max-w-[1200px] items-center px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
       <div className="mx-auto w-full max-w-3xl rounded-xl border border-[#D4AF37]/35 bg-[#141414] p-7 sm:p-10 lg:p-12">
         <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-12">
+          {/* Left / Main Confirmation Content */}
           <div className="md:col-span-8">
+            {/* Gold Checkmark Badge */}
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-full border border-[#D4AF37]/50 bg-[#D4AF37]/15 text-[#D4AF37]">
               <Check className="h-7 w-7 stroke-[2.5]" />
             </div>
@@ -41,6 +43,7 @@ export function ThankYouView({ firstName }: ThankYouViewProps) {
             </p>
 
             <div className="mt-8 flex flex-col gap-3.5">
+              {/* Primary Gold Download Button */}
               <a
                 href={PDF_URL}
                 download={PDF_FILENAME}
@@ -52,6 +55,7 @@ export function ThankYouView({ firstName }: ThankYouViewProps) {
                 <span>Download The Smart Footwear Buyer&apos;s Guide (PDF)</span>
               </a>
 
+              {/* Secondary WhatsApp Button */}
               <a
                 href={WHATSAPP_URL}
                 target="_blank"
@@ -64,6 +68,7 @@ export function ThankYouView({ firstName }: ThankYouViewProps) {
             </div>
           </div>
 
+          {/* Right Guide Cover Preview */}
           <div className="hidden md:col-span-4 md:block">
             <div className="overflow-hidden rounded-lg border border-[#D4AF37]/30 bg-[#0A0A0A]">
               <ResilientImage
