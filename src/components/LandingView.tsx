@@ -105,10 +105,9 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
     };
   }, []);
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     if (isSubmittingRef.current) {
+      e.preventDefault();
       return;
     }
 
@@ -117,6 +116,7 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
     const trimmedPhone = phone.trim();
 
     if (trimmedName.length < 2) {
+      e.preventDefault();
       setErrorMessage('Please enter your full name so we can personalize your guide.');
       nameInputRef.current?.focus();
       return;
@@ -124,12 +124,14 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmedEmail)) {
+      e.preventDefault();
       setErrorMessage('Please enter a valid email address.');
       return;
     }
 
     const phoneDigits = trimmedPhone.replace(/\D/g, '');
     if (phoneDigits.length < 7) {
+      e.preventDefault();
       setErrorMessage('Please enter a valid WhatsApp or phone number.');
       return;
     }
@@ -140,32 +142,20 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
 
     const extractedFirstName = trimmedName.split(/\s+/)[0] || 'Friend';
 
-    const payload = new URLSearchParams({
-      'entry.1247310815': trimmedName,
-      'entry.395392008': trimmedEmail,
-      'entry.1087792134': trimmedPhone,
-    });
-
-    try {
-      await fetch(GOOGLE_FORM_ACTION_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        },
-        body: payload.toString(),
-      });
-    } catch {
-      // Ignore opaque/network errors in no-cors mode so user still gets the guide
-    }
-
+    // Let native POST submit to hidden_gform_iframe, then open ThankYouView
     timerRef.current = window.setTimeout(() => {
       onSuccess(extractedFirstName);
-    }, 500);
+    }, 700);
   };
 
   return (
     <main id="top" className="pb-20">
+      <iframe
+        name="hidden_gform_iframe"
+        title="Hidden Google Form Submission Target"
+        style={{ display: 'none' }}
+      />
+
       {/* Hero + Lead Capture Split */}
       <section className="mx-auto max-w-[1200px] px-4 pt-8 pb-16 sm:px-6 sm:pt-12 lg:px-8 lg:pt-14 lg:pb-20">
         <div className="grid grid-cols-1 items-stretch gap-10 lg:grid-cols-12 lg:gap-12">
@@ -265,6 +255,9 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
                 </div>
 
                 <form
+                  method="POST"
+                  target="hidden_gform_iframe"
+                  action={GOOGLE_FORM_ACTION_URL}
                   onSubmit={handleSubmit}
                   className="mt-6 space-y-5"
                   noValidate
@@ -392,288 +385,4 @@ export function LandingView({ onSuccess, nameInputRef }: LandingViewProps) {
                   className="flex flex-col justify-between rounded-xl border border-white/10 bg-[#141414] p-7 transition-colors duration-150 hover:border-[#D4AF37]/40"
                 >
                   <div>
-                    <div className="flex items-center justify-between">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-[#D4AF37]/30 bg-[#D4AF37]/10 text-[#D4AF37]">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <span className="font-mono text-xs font-medium tabular-nums text-[#8C8C8C]">
-                        {benefit.number}
-                      </span>
-                    </div>
-
-                    <h3 className="mt-6 font-serif text-2xl font-semibold text-[#FAFAFA]">
-                      {benefit.title}
-                    </h3>
-
-                    <p className="mt-3 text-sm leading-[1.65] text-[#B3B3B3] sm:text-[15px]">
-                      {benefit.description}
-                    </p>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Section 3: Craftsmanship & 7-Point Checklist Preview */}
-      <section
-        id="inside-guide"
-        className="border-t border-white/10 bg-[#0A0A0A] py-16 sm:py-20"
-      >
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 items-stretch gap-10 lg:grid-cols-12 lg:gap-12">
-            {/* Craftsmanship & Sneaker Inspection Visuals */}
-            <div className="flex flex-col lg:col-span-6">
-              <div className="flex h-full flex-col justify-between rounded-xl border border-white/10 bg-[#141414] p-3 sm:p-5">
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                  <div className="relative aspect-square overflow-hidden rounded-lg border border-white/10 bg-[#0A0A0A]">
-                    <ResilientImage
-                      src={shoeAirF}
-                      alt="White mid-top leather sneakers showing clean toe perforations, strap, and midsole stitching"
-                      width={591}
-                      height={574}
-                      className="h-full w-full object-cover object-center"
-                      aspectClassName="aspect-square"
-                      fallbackLabel="Clean Upper Finish"
-                    />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/80 via-transparent to-transparent" />
-                    <p className="absolute right-3 bottom-2.5 left-3 text-xs font-medium text-[#FAFAFA]">
-                      Toe Box &amp; Strap Alignment
-                    </p>
-                  </div>
-
-                  <div className="relative aspect-square overflow-hidden rounded-lg border border-white/10 bg-[#0A0A0A]">
-                    <ResilientImage
-                      src={shoeNb}
-                      alt="Red and grey suede and mesh sneakers showing multi-panel layering and sculpted sole"
-                      width={640}
-                      height={571}
-                      className="h-full w-full object-cover object-center"
-                      aspectClassName="aspect-square"
-                      fallbackLabel="Panel & Sole Detail"
-                    />
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/80 via-transparent to-transparent" />
-                    <p className="absolute right-3 bottom-2.5 left-3 text-xs font-medium text-[#FAFAFA]">
-                      Mesh, Suede &amp; Sole Grip
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-5 border-t border-white/10 pt-5">
-                  <p className="text-xs font-semibold tracking-[0.12em] text-[#D4AF37]">
-                    CRAFT &amp; INSPECTION STANDARD
-                  </p>
-                  <p className="mt-1.5 font-serif text-xl font-medium text-[#FAFAFA] sm:text-2xl">
-                    Verify leather grain, panel stitching, and real multi-angle photos before paying.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* 7 Things Inside the Guide */}
-            <div className="flex flex-col justify-between lg:col-span-6">
-              <div>
-                <p className="text-xs font-semibold tracking-[0.14em] text-[#D4AF37]">
-                  INSIDE THE PDF GUIDE
-                </p>
-                <h2 className="mt-2 font-serif text-3xl font-semibold tracking-tight text-[#FAFAFA] sm:text-4xl">
-                  7 Things to Check Before Buying Footwear Online
-                </h2>
-
-                <ol className="mt-6 divide-y divide-white/10 border-y border-white/10">
-                  {CHECKLIST_PREVIEW.map((item) => (
-                    <li key={item.num} className="flex items-start gap-4 py-3.5">
-                      <span className="mt-0.5 font-mono text-xs font-semibold tabular-nums text-[#D4AF37]">
-                        {item.num}
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold text-[#FAFAFA]">{item.title}</p>
-                        <p className="mt-0.5 text-xs leading-relaxed text-[#A3A3A3]">
-                          {item.detail}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-
-              <div className="mt-8">
-                <a
-                  href="#register-card"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document
-                      .getElementById('register-card')
-                      ?.scrollIntoView({ behavior: 'smooth' });
-                    window.setTimeout(() => nameInputRef.current?.focus(), 350);
-                  }}
-                  className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-lg bg-[#D4AF37] px-6 py-3 text-sm font-bold text-[#0A0A0A] transition-colors duration-150 hover:bg-[#E5C453] focus-visible:outline-2 focus-visible:outline-[#D4AF37] focus-visible:outline-offset-2"
-                >
-                  <span>Send Me The Free Guide</span>
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 4: Footwear Styles Covered in This Guide */}
-      <section
-        id="styles-covered"
-        className="border-t border-white/10 bg-[#0A0A0A] py-16 sm:py-20"
-      >
-        <div className="mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-            <div className="max-w-2xl">
-              <p className="text-xs font-semibold tracking-[0.14em] text-[#D4AF37]">
-                EVERY SILHOUETTE COVERED
-              </p>
-              <h2 className="mt-2 font-serif text-3xl font-semibold tracking-tight text-[#FAFAFA] sm:text-4xl">
-                Heels, Slip-On Mules &amp; Everyday Sneakers
-              </h2>
-            </div>
-            <p className="max-w-md text-sm leading-relaxed text-[#A3A3A3]">
-              Apply the exact same sizing, material, and stitching checks across every category before placing your order.
-            </p>
-          </div>
-
-          <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-6">
-            <div className="relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-[#141414] lg:col-span-3 lg:aspect-[5/4]">
-              <ResilientImage
-                src={shoeHll}
-                alt="Glossy black patent pointed-toe kitten heels"
-                width={640}
-                height={640}
-                loading="lazy"
-                className="h-full w-full object-cover object-center"
-                aspectClassName="aspect-square lg:aspect-[5/4]"
-                fallbackLabel="Black Patent Heels"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/85 via-transparent to-transparent" />
-              <div className="absolute right-3 bottom-3 left-3 sm:right-4 sm:bottom-4 sm:left-4">
-                <p className="text-xs font-semibold text-[#FAFAFA] sm:text-sm">
-                  Pointed-Toe Heels
-                </p>
-                <p className="mt-0.5 text-[11px] text-[#D4AF37] sm:text-xs">
-                  Check toe-box taper &amp; heel pitch
-                </p>
-              </div>
-            </div>
-
-            <div className="relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-[#141414] lg:col-span-3 lg:aspect-[5/4]">
-              <ResilientImage
-                src={shoeHi}
-                alt="Black sculptural block-heel mules with silver metallic ring accent"
-                width={640}
-                height={640}
-                loading="lazy"
-                className="h-full w-full object-cover object-center"
-                aspectClassName="aspect-square lg:aspect-[5/4]"
-                fallbackLabel="Sculptural Block Mules"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/85 via-transparent to-transparent" />
-              <div className="absolute right-3 bottom-3 left-3 sm:right-4 sm:bottom-4 sm:left-4">
-                <p className="text-xs font-semibold text-[#FAFAFA] sm:text-sm">
-                  Sculptural Block Mules
-                </p>
-                <p className="mt-0.5 text-[11px] text-[#D4AF37] sm:text-xs">
-                  Verify heel stability &amp; hardware finish
-                </p>
-              </div>
-            </div>
-
-            <div className="relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-[#141414] lg:col-span-2">
-              <ResilientImage
-                src={shoeAd}
-                alt="Cream and black retro three-stripe leather sneakers"
-                width={640}
-                height={574}
-                loading="lazy"
-                className="h-full w-full object-cover object-center"
-                aspectClassName="aspect-square"
-                fallbackLabel="Classic Court Sneakers"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/85 via-transparent to-transparent" />
-              <div className="absolute right-3 bottom-3 left-3">
-                <p className="text-xs font-semibold text-[#FAFAFA]">
-                  Classic Court Sneakers
-                </p>
-              </div>
-            </div>
-
-            <div className="relative aspect-square overflow-hidden rounded-xl border border-white/10 bg-[#141414] lg:col-span-2">
-              <ResilientImage
-                src={shoeCrocs}
-                alt="Matte black sculpted foam clogs with ventilated upper and heel strap"
-                width={640}
-                height={640}
-                loading="lazy"
-                className="h-full w-full object-cover object-center"
-                aspectClassName="aspect-square"
-                fallbackLabel="Everyday Comfort Clogs"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/85 via-transparent to-transparent" />
-              <div className="absolute right-3 bottom-3 left-3">
-                <p className="text-xs font-semibold text-[#FAFAFA]">
-                  Everyday Comfort Clogs
-                </p>
-              </div>
-            </div>
-
-            <div className="col-span-2 relative aspect-[2/1] overflow-hidden rounded-xl border border-white/10 bg-[#141414] lg:col-span-2 lg:aspect-square">
-              <ResilientImage
-                src={shoePpink}
-                alt="Blush pink platform sneakers with gum sole and gold heel detail"
-                width={640}
-                height={640}
-                loading="lazy"
-                className="h-full w-full object-cover object-center"
-                aspectClassName="aspect-[2/1] lg:aspect-square"
-                fallbackLabel="Platform Lifestyle Sneakers"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0A0A0A]/85 via-transparent to-transparent" />
-              <div className="absolute right-3 bottom-3 left-3">
-                <p className="text-xs font-semibold text-[#FAFAFA]">
-                  Platform Lifestyle Sneakers
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 5: Final Conversion CTA Banner */}
-      <section className="border-t border-white/10 bg-[#111111] py-16 sm:py-20">
-        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="text-xs font-semibold tracking-[0.14em] text-[#D4AF37]">
-            GIDDY MINE COLLECTIONS
-          </p>
-          <h2 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-[#FAFAFA] sm:text-4xl">
-            Ready to Order Your Next Pair With Complete Confidence?
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-[#B8B8B8]">
-            Claim your free copy of <span className="font-medium text-[#FAFAFA]">The Smart Footwear Buyer&apos;s Guide</span> now and keep the 7-point checklist handy before every purchase.
-          </p>
-          <div className="mt-8">
-            <a
-              href="#register-card"
-              onClick={(e) => {
-                e.preventDefault();
-                document
-                  .getElementById('register-card')
-                  ?.scrollIntoView({ behavior: 'smooth' });
-                window.setTimeout(() => nameInputRef.current?.focus(), 350);
-              }}
-              className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-lg bg-[#D4AF37] px-8 py-3.5 text-sm font-bold tracking-wide text-[#0A0A0A] transition-colors duration-150 hover:bg-[#E5C453] focus-visible:outline-2 focus-visible:outline-[#D4AF37] focus-visible:outline-offset-2"
-            >
-              <span>Get My Free Buyer&apos;s Guide</span>
-              <ArrowRight className="h-4 w-4" />
-            </a>
-          </div>
-        </div>
-      </section>
-    </main>
-  );
-}
+                    <div
